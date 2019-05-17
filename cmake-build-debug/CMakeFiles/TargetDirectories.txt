@@ -1,0 +1,7 @@
+/Users/emp/c++/dawnshine/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/emp/c++/dawnshine/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/emp/c++/dawnshine/cmake-build-debug/CMakeFiles/dawnshine.dir
+/Users/emp/c++/dawnshine/cmake-build-debug/test/CMakeFiles/rebuild_cache.dir
+/Users/emp/c++/dawnshine/cmake-build-debug/test/CMakeFiles/edit_cache.dir
+/Users/emp/c++/dawnshine/cmake-build-debug/test/CMakeFiles/test_epoll_client.dir
+/Users/emp/c++/dawnshine/cmake-build-debug/test/CMakeFiles/test_epoll.dir

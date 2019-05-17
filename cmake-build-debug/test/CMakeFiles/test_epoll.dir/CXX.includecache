@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/emp/c++/dawnshine/test/test_epoll.cc
+sys/socket.h
+-
+netinet/in.h
+-
+stdio.h
+-
+error.h
+-
+errno.h
+-
+unistd.h
+-
+string.h
+-
+stdlib.h
+-
+sys/wait.h
+-
+limits.h
+-
+poll.h
+-
+sys/stropts.h
+-
+signal.h
+-
+fcntl.h
+-
+sys/epoll.h
+-
+time.h
+-
+list
+-
+arpa/inet.h
+-
+
