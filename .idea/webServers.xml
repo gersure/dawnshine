@@ -3,7 +3,7 @@
   <component name="WebServers">
     <option name="servers">
       <webServer id="420a6f83-6e57-44d9-b973-dd6809282ae8" name="dswnshine" url="http://alta1-bjarch-ekvstore-fy20-1.vm.elenet.me">
-        <fileTransfer host="alta1-bjarch-ekvstore-fy20-1.vm.elenet.me" port="2018" rootFolder="/root" accessType="SFTP" authAgent="true">
+        <fileTransfer host="alta1-bjarch-ekvstore-fy20-1.vm.elenet.me" port="2018" privateKey="$USER_HOME$/.ssh/id_rsa" rootFolder="/root" accessType="SFTP" keyPair="true">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>

@@ -72,7 +72,7 @@ public:
 
     int get() const { return _fd; }
 
-    static file_desc open(sstring name, int flags, mode_t mode = 0) {
+    static file_desc open(std::string name, int flags, mode_t mode = 0) {
         int fd = ::open(name.c_str(), flags, mode);
         throw_system_error_on(fd == -1, "open");
         return file_desc(fd);
@@ -102,7 +102,7 @@ public:
         return file_desc(fd);
     }
 
-    static file_desc temporary(sstring directory);
+    static file_desc temporary(std::string directory);
 
     file_desc dup() const {
         int fd = ::dup(get());

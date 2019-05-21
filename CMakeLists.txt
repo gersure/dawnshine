@@ -17,9 +17,10 @@ set(SOURCE_FILES
         include/dawnshine/posix.hh
 
         src/net_addr.cc
+        src/reactor.cc
         library.h
         library.cpp
-        include/util/utilimpl.hh src/reactor.cc test/test_aio.cc)
+        include/util/utilimpl.hh)
 
 add_library(dawnshine ${SOURCE_FILES})
 

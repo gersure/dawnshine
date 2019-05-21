@@ -8,7 +8,9 @@
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include<netinet/in.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <ostream>
 
 struct listen_options {
     bool reuse_address = false;
@@ -20,17 +22,18 @@ struct ipv4_addr {
 };
 
 class socket_address {
-private:
+public:
     union {
         ::sockaddr_storage sas;
         ::sockaddr sa;
         ::sockaddr_in in;
     } u;
+    friend std::ostream& operator<<(std::ostream&,const socket_address&);
     friend socket_address make_ipv4_address(ipv4_addr addr);
     friend socket_address make_ipv4_address(const std::string addr);
     friend class reactor;
 };
 
-
+std::ostream& operator<<(std::ostream&,const socket_address&);
 socket_address make_ipv4_address(ipv4_addr addr);
 socket_address make_ipv4_address(const std::string addr);

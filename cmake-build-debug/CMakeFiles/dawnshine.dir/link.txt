@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc libdawnshine.a  CMakeFiles/dawnshine.dir/src/net_addr.cc.o CMakeFiles/dawnshine.dir/library.cpp.o CMakeFiles/dawnshine.dir/src/reactor.cc.o CMakeFiles/dawnshine.dir/test/test_aio.cc.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib libdawnshine.a

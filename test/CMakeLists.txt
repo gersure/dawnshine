@@ -1,6 +1,6 @@
 # test files and exec
 
-set(THIRD_LIBS "")
+set(THIRD_LIBS dawnshine)
 
 #find_package(Boost 1.53 REQUIRED COMPONENTS system thread)
 #include_directories(SYSTEM ${Boost_INCLUDE_DIR})
@@ -9,10 +9,14 @@ set(THIRD_LIBS "")
 list(APPEND THIRD_LIBS gtest aio)
 
 
+include_directories(../include)
+
+
 set(SOURCE_FILES
         test_epoll.cc
         test_epoll_client.cc
         test_aio.cc
+        test_reactor.cc
         )
 
 function(add_test filepath)
