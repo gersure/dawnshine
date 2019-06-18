@@ -18,8 +18,9 @@ public:
 
     void do_accepts(int which) {
         std::pair<pollable_fd, socket_address> res = _listeners[which].accept();
-        new connection(*this, std::move(res.first), res.second);
+        auto conn = new connection(*this, std::move(res.first), res.second);
         std::cout<<"accept from:"<< res.second << std::endl;
+        delete conn;
     }
 
     class connection {

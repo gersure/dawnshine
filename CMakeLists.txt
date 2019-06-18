@@ -18,8 +18,6 @@ set(SOURCE_FILES
 
         src/net_addr.cc
         src/reactor.cc
-        library.h
-        library.cpp
         include/util/utilimpl.hh)
 
 add_library(dawnshine ${SOURCE_FILES})

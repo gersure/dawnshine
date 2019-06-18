@@ -15,10 +15,12 @@ class reactor {
     friend class file;
 
     static constexpr size_t max_aio = 128;
-public:
+
     reactor(const reactor &) = delete;
 
     void operator=(const reactor &) = delete;
+
+public:
 
     reactor();
 
@@ -27,7 +29,7 @@ public:
     std::pair<pollable_fd, socket_address> accept(pollable_fd_state &listen_fd);
 
 private:
-    void get_epoll_future(pollable_fd_state &fd, int event);
+    void set_epoll_state(pollable_fd_state &fd, int event);
 
     void complete_epoll_event(pollable_fd_state &fd, int events, int event);
 
@@ -35,9 +37,7 @@ private:
 
     void forget(pollable_fd_state &fd);
 
-public:
     file_desc epollfd_;
-
 };
 
 
@@ -49,5 +49,6 @@ pollable_fd::accept() {
 
 inline
 pollable_fd::~pollable_fd() {
-    reactor_.forget(*s_);
+    if (s_)
+        reactor_.forget(*s_);
 }

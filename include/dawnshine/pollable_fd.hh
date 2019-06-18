@@ -44,7 +44,7 @@ public:
 
     pollable_fd(reactor &rec, file_desc fd, speculation speculate = speculation())
             : reactor_(rec),
-              s_(std::make_unique<pollable_fd_state>(rec, std::move(fd), speculate)) {}
+              s_(std::make_unique<pollable_fd_state>(std::move(fd), speculate)) {}
 
 public:
     pollable_fd(pollable_fd &&) = default;
@@ -55,14 +55,15 @@ public:
 
     std::pair<pollable_fd, socket_address> accept();
 
+    size_t read_some(char *buffer, size_t size);
 
-    /*
-    size_t read_some(char* buffer, size_t size);
-    size_t read_some(uint8_t* buffer, size_t size);
-    size_t read_some(const std::vector<iovec>& iov);
-    size_t write_all(const char* buffer, size_t size);
-    size_t write_all(const uint8_t* buffer, size_t size);
-     */
+    size_t read_some(uint8_t *buffer, size_t size);
+
+    size_t read_some(const std::vector<iovec> &iov);
+
+    size_t write_all(const char *buffer, size_t size);
+
+    size_t write_all(const uint8_t *buffer, size_t size);
 
 protected:
     int get_fd() const { return s_->fd_.get(); }
