@@ -6,7 +6,7 @@
 #include "dawnshine/reactor.hh"
 
 reactor::reactor()
-        : _epollfd(file_desc::epoll_create(EPOLL_CLOEXEC))
+        : epollfd_(file_desc::epoll_create(EPOLL_CLOEXEC))
 //          _io_eventfd(),
 //          _io_context(0),
 //          _io_context_available(max_aio)
@@ -18,8 +18,7 @@ reactor::reactor()
 }
 
 pollable_fd reactor::listen(socket_address sa, listen_options opts) {
-//    file_desc fd = file_desc::socket(sa.u.sa.sa_family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-    file_desc fd = file_desc::socket(sa.u.sa.sa_family, SOCK_STREAM  | SOCK_CLOEXEC, 0);
+    file_desc fd = file_desc::socket(sa.u.sa.sa_family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
     if (opts.reuse_address) {
         int opt = 1;
         fd.setsockopt(SOL_SOCKET, SO_REUSEADDR, opt);
@@ -33,7 +32,7 @@ pollable_fd reactor::listen(socket_address sa, listen_options opts) {
 #if 0
 void reactor::run() {
     std::array<epoll_event, 128> eevt;
-    int nr = ::epoll_wait(_epollfd.get(), eevt.data(), eevt.size(), -1);
+    int nr = ::epoll_wait(epollfd_.get(), eevt.data(), eevt.size(), -1);
     assert(nr != -1);
     for (int i = 0; i < nr; i++) {
         auto &evt = eevt[i];
@@ -48,7 +47,7 @@ void reactor::run() {
             pfd->events_epoll &= ~events_to_remove;
             evt.events = pfd->events_epoll;
             auto op = evt.events ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
-            ::epoll_ctl(_epollfd.get(), op, pfd->fd.get(), &evt);
+            ::epoll_ctl(epollfd_.get(), op, pfd->fd.get(), &evt);
         }
     }
 }
@@ -59,8 +58,7 @@ reactor::accept(pollable_fd_state &listen_fd) {
     readable(listen_fd);
     socket_address sa;
     socklen_t sl = sizeof(&sa.u.sas);
-//    file_desc fd = listen_fd.fd.accept(sa.u.sa, sl, SOCK_NONBLOCK | SOCK_CLOEXEC);
-    file_desc fd = listen_fd.fd.accept(sa.u.sa, sl, SOCK_CLOEXEC);
+    file_desc fd = listen_fd.fd.accept(sa.u.sa, sl, SOCK_NONBLOCK | SOCK_CLOEXEC);
     pollable_fd pfd(*this, std::move(fd), pollable_fd::speculation(EPOLLOUT));
     return std::pair<pollable_fd, socket_address>(std::move(pfd), std::move(sa));
 }
@@ -78,7 +76,7 @@ void reactor::get_epoll_future(pollable_fd_state &pfd, int event) {
         ::epoll_event eevt;
         eevt.events = pfd.events_epoll;
         eevt.data.ptr = &pfd;
-        int r = ::epoll_ctl(_epollfd.get(), ctl, pfd.fd.get(), &eevt);
+        int r = ::epoll_ctl(epollfd_.get(), ctl, pfd.fd_.get(), &eevt);
         assert(r == 0);
     }
     return;
@@ -91,10 +89,6 @@ void reactor::readable(pollable_fd_state &fd) {
 
 void reactor::forget(pollable_fd_state &fd) {
     if (fd.events_epoll) {
-        ::epoll_ctl(_epollfd.get(), EPOLL_CTL_DEL, fd.fd.get(), nullptr);
+        ::epoll_ctl(epollfd_.get(), EPOLL_CTL_DEL, fd.fd_.get(), nullptr);
     }
-}
-
-pollable_fd_state::~pollable_fd_state() {
-    this->_reactor.forget(*this);
 }

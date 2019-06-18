@@ -41,22 +41,22 @@ using mmap_area = std::unique_ptr<char[], mmap_deleter>;
 mmap_area mmap_anonymous(void *addr, size_t length, int prot, int flags);
 
 class file_desc {
-    int _fd;
+    int fd_;
 public:
     file_desc() = delete;
 
     file_desc(const file_desc &) = delete;
 
-    file_desc(file_desc &&x) : _fd(x._fd) { x._fd = -1; }
+    file_desc(file_desc &&x) : fd_(x.fd_) { x.fd_ = -1; }
 
-    ~file_desc() { if (_fd != -1) { ::close(_fd); }}
+    ~file_desc() { if (fd_ != -1) { ::close(fd_); }}
 
     void operator=(const file_desc &) = delete;
 
     file_desc &operator=(file_desc &&x) {
         if (this != &x) {
-            std::swap(_fd, x._fd);
-            if (x._fd != -1) {
+            std::swap(fd_, x.fd_);
+            if (x.fd_ != -1) {
                 x.close();
             }
         }
@@ -64,13 +64,13 @@ public:
     }
 
     void close() {
-        assert(_fd != -1);
-        auto r = ::close(_fd);
+        assert(fd_ != -1);
+        auto r = ::close(fd_);
         throw_system_error_on(r == -1, "close");
-        _fd = -1;
+        fd_ = -1;
     }
 
-    int get() const { return _fd; }
+    int get() const { return fd_; }
 
     static file_desc open(std::string name, int flags, mode_t mode = 0) {
         int fd = ::open(name.c_str(), flags, mode);
@@ -111,20 +111,20 @@ public:
     }
 
     file_desc accept(sockaddr &sa, socklen_t &sl, int flags = 0) {
-        auto ret = ::accept4(_fd, &sa, &sl, flags);
+        auto ret = ::accept4(fd_, &sa, &sl, flags);
         throw_system_error_on(ret == -1, "accept4");
         return file_desc(ret);
     }
 
     void shutdown(int how) {
-        auto ret = ::shutdown(_fd, how);
+        auto ret = ::shutdown(fd_, how);
         if (ret == -1 && errno != ENOTCONN) {
             throw_system_error_on(ret == -1, "shutdown");
         }
     }
 
     void truncate(size_t size) {
-        auto ret = ::ftruncate(_fd, size);
+        auto ret = ::ftruncate(fd_, size);
         throw_system_error_on(ret, "ftruncate");
     }
 
@@ -133,40 +133,40 @@ public:
     }
 
     int ioctl(int request, int value) {
-        int r = ::ioctl(_fd, request, value);
+        int r = ::ioctl(fd_, request, value);
         throw_system_error_on(r == -1, "ioctl");
         return r;
     }
 
     int ioctl(int request, unsigned int value) {
-        int r = ::ioctl(_fd, request, value);
+        int r = ::ioctl(fd_, request, value);
         throw_system_error_on(r == -1, "ioctl");
         return r;
     }
 
     template<class X>
     int ioctl(int request, X &data) {
-        int r = ::ioctl(_fd, request, &data);
+        int r = ::ioctl(fd_, request, &data);
         throw_system_error_on(r == -1, "ioctl");
         return r;
     }
 
     template<class X>
     int ioctl(int request, X &&data) {
-        int r = ::ioctl(_fd, request, &data);
+        int r = ::ioctl(fd_, request, &data);
         throw_system_error_on(r == -1, "ioctl");
         return r;
     }
 
     template<class X>
     int setsockopt(int level, int optname, X &&data) {
-        int r = ::setsockopt(_fd, level, optname, &data, sizeof(data));
+        int r = ::setsockopt(fd_, level, optname, &data, sizeof(data));
         throw_system_error_on(r == -1, "setsockopt");
         return r;
     }
 
     int setsockopt(int level, int optname, const char *data) {
-        int r = ::setsockopt(_fd, level, optname, data, strlen(data) + 1);
+        int r = ::setsockopt(fd_, level, optname, data, strlen(data) + 1);
         throw_system_error_on(r == -1, "setsockopt");
         return r;
     }
@@ -176,26 +176,26 @@ public:
         Data data;
         socklen_t len = sizeof(data);
         memset(&data, 0, len);
-        int r = ::getsockopt(_fd, level, optname, &data, &len);
+        int r = ::getsockopt(fd_, level, optname, &data, &len);
         throw_system_error_on(r == -1, "getsockopt");
         return data;
     }
 
     int getsockopt(int level, int optname, char *data, socklen_t len) {
-        int r = ::getsockopt(_fd, level, optname, data, &len);
+        int r = ::getsockopt(fd_, level, optname, data, &len);
         throw_system_error_on(r == -1, "getsockopt");
         return r;
     }
 
     size_t size() {
         struct stat buf;
-        auto r = ::fstat(_fd, &buf);
+        auto r = ::fstat(fd_, &buf);
         throw_system_error_on(r == -1, "fstat");
         return buf.st_size;
     }
 
     boost::optional <size_t> read(void *buffer, size_t len) {
-        auto r = ::read(_fd, buffer, len);
+        auto r = ::read(fd_, buffer, len);
         if (r == -1 && errno == EAGAIN) {
             return {};
         }
@@ -204,7 +204,7 @@ public:
     }
 
     boost::optional <ssize_t> recv(void *buffer, size_t len, int flags) {
-        auto r = ::recv(_fd, buffer, len, flags);
+        auto r = ::recv(fd_, buffer, len, flags);
         if (r == -1 && errno == EAGAIN) {
             return {};
         }
@@ -213,7 +213,7 @@ public:
     }
 
     boost::optional <size_t> recvmsg(msghdr *mh, int flags) {
-        auto r = ::recvmsg(_fd, mh, flags);
+        auto r = ::recvmsg(fd_, mh, flags);
         if (r == -1 && errno == EAGAIN) {
             return {};
         }
@@ -222,7 +222,7 @@ public:
     }
 
     boost::optional <size_t> send(const void *buffer, size_t len, int flags) {
-        auto r = ::send(_fd, buffer, len, flags);
+        auto r = ::send(fd_, buffer, len, flags);
         if (r == -1 && errno == EAGAIN) {
             return {};
         }
@@ -231,7 +231,7 @@ public:
     }
 
     boost::optional <size_t> sendto(socket_address &addr, const void *buf, size_t len, int flags) {
-        auto r = ::sendto(_fd, buf, len, flags, &addr.u.sa, sizeof(addr.u.sas));
+        auto r = ::sendto(fd_, buf, len, flags, &addr.u.sa, sizeof(addr.u.sas));
         if (r == -1 && errno == EAGAIN) {
             return {};
         }
@@ -240,7 +240,7 @@ public:
     }
 
     boost::optional <size_t> sendmsg(const msghdr *msg, int flags) {
-        auto r = ::sendmsg(_fd, msg, flags);
+        auto r = ::sendmsg(fd_, msg, flags);
         if (r == -1 && errno == EAGAIN) {
             return {};
         }
@@ -249,12 +249,12 @@ public:
     }
 
     void bind(sockaddr &sa, socklen_t sl) {
-        auto r = ::bind(_fd, &sa, sl);
+        auto r = ::bind(fd_, &sa, sl);
         throw_system_error_on(r == -1, "bind");
     }
 
     void connect(sockaddr &sa, socklen_t sl) {
-        auto r = ::connect(_fd, &sa, sl);
+        auto r = ::connect(fd_, &sa, sl);
         if (r == -1 && errno == EINPROGRESS) {
             return;
         }
@@ -264,18 +264,18 @@ public:
     socket_address get_address() {
         socket_address addr;
         auto len = (socklen_t) sizeof(addr.u.sas);
-        auto r = ::getsockname(_fd, &addr.u.sa, &len);
+        auto r = ::getsockname(fd_, &addr.u.sa, &len);
         throw_system_error_on(r == -1, "getsockname");
         return addr;
     }
 
     void listen(int backlog) {
-        auto fd = ::listen(_fd, backlog);
+        auto fd = ::listen(fd_, backlog);
         throw_system_error_on(fd == -1, "listen");
     }
 
     boost::optional <size_t> write(const void *buf, size_t len) {
-        auto r = ::write(_fd, buf, len);
+        auto r = ::write(fd_, buf, len);
         if (r == -1 && errno == EAGAIN) {
             return {};
         }
@@ -284,7 +284,7 @@ public:
     }
 
     boost::optional <size_t> writev(const iovec *iov, int iovcnt) {
-        auto r = ::writev(_fd, iov, iovcnt);
+        auto r = ::writev(fd_, iov, iovcnt);
         if (r == -1 && errno == EAGAIN) {
             return {};
         }
@@ -293,19 +293,19 @@ public:
     }
 
     size_t pread(void *buf, size_t len, off_t off) {
-        auto r = ::pread(_fd, buf, len, off);
+        auto r = ::pread(fd_, buf, len, off);
         throw_system_error_on(r == -1, "pread");
         return size_t(r);
     }
 
     void timerfd_settime(int flags, const itimerspec &its) {
-        auto r = ::timerfd_settime(_fd, flags, &its, NULL);
+        auto r = ::timerfd_settime(fd_, flags, &its, NULL);
         throw_system_error_on(r == -1, "timerfd_settime");
     }
 
     mmap_area map(size_t size, unsigned prot, unsigned flags, size_t offset,
                   void *addr = nullptr) {
-        void *x = mmap(addr, size, prot, flags, _fd, offset);
+        void *x = mmap(addr, size, prot, flags, fd_, offset);
         throw_system_error_on(x == MAP_FAILED, "mmap");
         return mmap_area(static_cast<char *>(x), mmap_deleter{size});
     }
@@ -327,7 +327,7 @@ public:
     }
 
 private:
-    file_desc(int fd) : _fd(fd) {}
+    file_desc(int fd) : fd_(fd) {}
 };
 
 

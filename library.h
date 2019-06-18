@@ -1,6 +1,0 @@
-#ifndef DAWNSHINE_LIBRARY_H
-#define DAWNSHINE_LIBRARY_H
-
-void hello();
-
-#endif //DAWNSHINE_LIBRARY_H
